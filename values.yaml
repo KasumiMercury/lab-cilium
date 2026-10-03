@@ -6,6 +6,11 @@ cni:
   confPath: /var/snap/microk8s/current/args/cni-network
   binPath: /var/snap/microk8s/current/opt/cni/bin
 
+# MicroK8s' containerd sets CILIUM_SOCK=$SNAP_DATA/var/run/cilium/cilium.sock, so cilium-cni looks for the
+# agent there. Put the agent's run directory (socket included) at the same place (required on MicroK8s).
+daemon:
+  runPath: /var/snap/microk8s/current/var/run/cilium
+
 ipam:
   operator:
     # Must match --cluster-cidr in /var/snap/microk8s/current/args/kube-proxy (MicroK8s default 10.1.0.0/16).

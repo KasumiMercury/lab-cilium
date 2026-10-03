@@ -19,8 +19,10 @@ self-contained: no references to files outside this directory.
   `$values/cilium/values.yaml`.
 
 ## Contract
-- Keep `cni.confPath`, `cni.binPath` and `ipam.operator.clusterPoolIPv4PodCIDRList` as they are unless
-  the MicroK8s side changes; the bootstrap depends on them.
+- Keep `cni.confPath`, `cni.binPath`, `daemon.runPath` and `ipam.operator.clusterPoolIPv4PodCIDRList` as
+  they are unless the MicroK8s side changes; the bootstrap depends on them. `daemon.runPath` must match the
+  `CILIUM_SOCK` that MicroK8s' containerd passes to cilium-cni (`$SNAP_DATA/var/run/cilium/cilium.sock`),
+  otherwise no Pod gets a network.
 - `kubeProxyReplacement: true` with `k8sServiceHost: 127.0.0.1` / `k8sServicePort: 16443` is part of the
   node contract: Ansible disables MicroK8s' kube-proxy on every node because this is true. Turning it off
   later requires Ansible to re-enable kube-proxy first (`kubeProxyReplacement` cannot be toggled on a

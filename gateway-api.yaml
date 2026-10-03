@@ -1,0 +1,7 @@
+# Gateway API CRDs (standard channel) that Cilium's Gateway API support needs (gatewayAPI.enabled in values.yaml).
+# Pick the version listed for the pinned Cilium release ("Gateway API support" in the Cilium docs) and bump it
+# together with version.yaml. The CRDs must exist before the Cilium operator starts.
+# Read by the Ansible bootstrap (<repo>/releases/download/<version>/standard-install.yaml) and by the ArgoCD
+# repo (<repo> at <version>, path config/crd/standard: the same CRDs and admission policy).
+repo: https://github.com/kubernetes-sigs/gateway-api
+version: v1.6.1

@@ -44,3 +44,8 @@ operator:
 # https://tailscale.com/kb/1236/kubernetes-operator (Cilium in kube-proxy replacement mode)
 socketLB:
   hostNamespaceOnly: true
+
+# Gateway API (GatewayClass "cilium"). Needs the CRDs pinned in gateway-api.yaml before the operator starts;
+# Gateways get a LoadBalancer Service whose IP comes from Cilium LB IPAM (pool defined in the ArgoCD repo).
+gatewayAPI:
+  enabled: true

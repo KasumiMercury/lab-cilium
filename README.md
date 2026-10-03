@@ -8,6 +8,7 @@ self-contained: no references to files outside this directory.
 - `version.yaml`: Helm repo, chart name and chart version (the single pin)
 - `values.yaml`: Helm values. Contains the MicroK8s-specific paths and the pod CIDR; anything else
   (custom images, features) is added here and rolled out by ArgoCD
+- `gateway-api.yaml`: Gateway API CRD version (standard channel) matching the pinned Cilium release
 
 ## Who reads it
 - **Ansible (`lab-proxmox`)**: bootstrap only. On a fresh cluster it runs
@@ -34,3 +35,6 @@ self-contained: no references to files outside this directory.
   move the submodule pointer in the ArgoCD repo in the same change, so a freshly bootstrapped cluster
   and ArgoCD agree on the version.
 - Deleting the ArgoCD Application must not delete Cilium: do not add the resources finalizer.
+- `gatewayAPI.enabled: true` requires the Gateway API CRDs before the Cilium operator starts. The Ansible
+  bootstrap installs the version in `gateway-api.yaml` before Cilium; ArgoCD syncs the same CRDs in an
+  earlier wave than Cilium. Bump `gateway-api.yaml` only to a version the pinned Cilium release supports.

@@ -36,6 +36,11 @@ k8sServicePort: 16443
 
 operator:
   replicas: 1
+  # Restart the operator when cilium-config changes (ArgoCD only updates the ConfigMap)
+  rollOutPods: true
+
+# Restart the agents when cilium-config changes; most settings are only read at startup
+rollOutCiliumPods: true
 
 # Keep socket-level load balancing in the host namespace only. Without this, Pod connections to
 # ClusterIPs bypass the netfilter rules of Tailscale proxies (LoadBalancer Services, the

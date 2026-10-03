@@ -23,6 +23,9 @@ self-contained: no references to files outside this directory.
   they are unless the MicroK8s side changes; the bootstrap depends on them. `daemon.runPath` must match the
   `CILIUM_SOCK` that MicroK8s' containerd passes to cilium-cni (`$SNAP_DATA/var/run/cilium/cilium.sock`),
   otherwise no Pod gets a network.
+- Keep `cgroup.hostRoot: /sys/fs/cgroup` (with `cgroup.autoMount.enabled: false`) while `daemon.runPath` is not
+  `/var/run/cilium`. Otherwise socket load balancing ends up in the agent's own cgroup and host-network pods
+  and the nodes cannot reach ClusterIPs.
 - `kubeProxyReplacement: true` with `k8sServiceHost: 127.0.0.1` / `k8sServicePort: 16443` is part of the
   node contract: Ansible disables MicroK8s' kube-proxy on every node because this is true. Turning it off
   later requires Ansible to re-enable kube-proxy first (`kubeProxyReplacement` cannot be toggled on a

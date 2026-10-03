@@ -11,6 +11,15 @@ cni:
 daemon:
   runPath: /var/snap/microk8s/current/var/run/cilium
 
+# Attach socket load balancing to the host's cgroup2 root, which Ubuntu already mounts at /sys/fs/cgroup.
+# The chart's default (/run/cilium/cgroupv2) reaches the agent only through a /var/run/cilium runPath; with the
+# runPath above the agent would mount cgroup2 inside its own cgroup namespace, and host-network pods and the
+# nodes themselves could not reach ClusterIPs (required on MicroK8s with the runPath above).
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
+
 ipam:
   operator:
     # Must match --cluster-cidr in /var/snap/microk8s/current/args/kube-proxy (MicroK8s default 10.1.0.0/16).

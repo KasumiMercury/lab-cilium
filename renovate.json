@@ -1,0 +1,22 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Cilium chart pin in version.yaml",
+      "managerFilePatterns": ["/^version\\.yaml$/"],
+      "matchStrings": [
+        "repo:\\s*(?<registryUrl>\\S+)\\s+chart:\\s*(?<depName>\\S+)\\s+version:\\s*(?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "helm"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Cilium only supports upgrading one minor version at a time",
+      "matchPackageNames": ["cilium"],
+      "separateMultipleMinor": true
+    }
+  ]
+}

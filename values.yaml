@@ -81,5 +81,8 @@ hubble:
       - flow:labelsContext=source_namespace,destination_namespace
       - port-distribution:labelsContext=source_namespace,destination_namespace
       - icmp:labelsContext=source_namespace,destination_namespace
+      # L7 HTTP metrics, only for traffic that a CiliumNetworkPolicy with HTTP rules sends through Envoy
+      # (the visibility policies live in the ArgoCD repo). Labels match the "L7 HTTP metrics by workload" dashboard.
+      - httpV2:labelsContext=source_namespace,source_workload,destination_namespace,destination_workload,traffic_direction
     dashboards:
       enabled: true

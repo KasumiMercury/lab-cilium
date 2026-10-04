@@ -64,6 +64,15 @@ gatewayAPI:
 # Dashboards are ConfigMaps labelled grafana_dashboard: "1" for the Grafana sidecar.
 prometheus:
   enabled: true
+  # Add the BPF syscall count/latency (off by default because every bpf() call is timed), used by the
+  # "system calls" panels of the Cilium dashboard. The other BPF metrics are on by default.
+  metrics:
+    - +cilium_bpf_syscall_duration_seconds
+
+# Emit cilium_bpf_map_pressure for every endpoint policy map, not only those more than 10% full (the default),
+# so the BPF map pressure panel shows the policy maps too
+bpf:
+  policyMapPressureMetricsThreshold: 0
 
 dashboards:
   enabled: true

@@ -38,3 +38,6 @@ self-contained: no references to files outside this directory.
 - `gatewayAPI.enabled: true` requires the Gateway API CRDs before the Cilium operator starts. The Ansible
   bootstrap installs the version in `gateway-api.yaml` before Cilium; ArgoCD syncs the same CRDs in an
   earlier wave than Cilium. Bump `gateway-api.yaml` only to a version the pinned Cilium release supports.
+- Metrics ports and Grafana dashboards are enabled here, but the scrape configuration (PodMonitors) lives in
+  the ArgoCD repo. Keep `prometheus.serviceMonitor.enabled` (and the operator/Hubble/Envoy equivalents) off:
+  the bootstrap installs Cilium before the Prometheus Operator CRDs exist.

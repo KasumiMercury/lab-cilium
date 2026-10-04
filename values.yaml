@@ -38,6 +38,9 @@ operator:
   replicas: 1
   # Restart the operator when cilium-config changes (ArgoCD only updates the ConfigMap)
   rollOutPods: true
+  # Metrics on :9963 are on by default; the dashboard goes with the agent's (see "Metrics" below)
+  dashboards:
+    enabled: true
 
 # Restart the agents when cilium-config changes; most settings are only read at startup
 rollOutCiliumPods: true
@@ -54,3 +57,29 @@ socketLB:
 # Gateways get a LoadBalancer Service whose IP comes from Cilium LB IPAM (pool defined in the ArgoCD repo).
 gatewayAPI:
   enabled: true
+
+# Metrics. The agent (:9962), operator (:9963), Envoy (:9964) and Hubble (:9965) serve Prometheus metrics on
+# host ports. The scrape configuration lives in the ArgoCD repo (PodMonitors): the chart's ServiceMonitors need
+# the Prometheus Operator CRDs, which do not exist yet when the Ansible bootstrap installs Cilium.
+# Dashboards are ConfigMaps labelled grafana_dashboard: "1" for the Grafana sidecar.
+prometheus:
+  enabled: true
+
+dashboards:
+  enabled: true
+  # The agent dashboard is larger than the 256 KiB last-applied-configuration annotation of client-side apply
+  annotations:
+    argocd.argoproj.io/sync-options: ServerSideApply=true
+
+hubble:
+  metrics:
+    # labelsContext adds source/destination namespaces, used by the per-namespace Hubble dashboards
+    enabled:
+      - dns:labelsContext=source_namespace,destination_namespace
+      - drop:labelsContext=source_namespace,destination_namespace
+      - tcp:labelsContext=source_namespace,destination_namespace
+      - flow:labelsContext=source_namespace,destination_namespace
+      - port-distribution:labelsContext=source_namespace,destination_namespace
+      - icmp:labelsContext=source_namespace,destination_namespace
+    dashboards:
+      enabled: true

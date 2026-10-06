@@ -1,20 +1,14 @@
-# Cilium Helm values for the MicroK8s cluster built by lab-proxmox.
-# Read by the Ansible bootstrap and by the ArgoCD Application; keep it the single source of truth.
+# Cilium Helm values for the Talos cluster built by lab-proxmox.
+# Read by the bootstrap task (lab-proxmox) and by the ArgoCD Application; keep it the single source of truth.
 
-# MicroK8s keeps CNI config and binaries under the snap data directory (required on MicroK8s)
-cni:
-  confPath: /var/snap/microk8s/current/args/cni-network
-  binPath: /var/snap/microk8s/current/opt/cni/bin
+# Talos does not let pods load kernel modules: the agent runs without SYS_MODULE
+# (https://docs.siderolabs.com/kubernetes-guides/cni/deploying-cilium)
+securityContext:
+  capabilities:
+    ciliumAgent: [CHOWN, KILL, NET_ADMIN, NET_RAW, IPC_LOCK, SYS_ADMIN, SYS_RESOURCE, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
+    cleanCiliumState: [NET_ADMIN, SYS_ADMIN, SYS_RESOURCE]
 
-# MicroK8s' containerd sets CILIUM_SOCK=$SNAP_DATA/var/run/cilium/cilium.sock, so cilium-cni looks for the
-# agent there. Put the agent's run directory (socket included) at the same place (required on MicroK8s).
-daemon:
-  runPath: /var/snap/microk8s/current/var/run/cilium
-
-# Attach socket load balancing to the host's cgroup2 root, which Ubuntu already mounts at /sys/fs/cgroup.
-# The chart's default (/run/cilium/cgroupv2) reaches the agent only through a /var/run/cilium runPath; with the
-# runPath above the agent would mount cgroup2 inside its own cgroup namespace, and host-network pods and the
-# nodes themselves could not reach ClusterIPs (required on MicroK8s with the runPath above).
+# Talos mounts the cgroup2 root at /sys/fs/cgroup and the agent must not mount its own (Talos docs)
 cgroup:
   autoMount:
     enabled: false
@@ -22,17 +16,15 @@ cgroup:
 
 ipam:
   operator:
-    # Must match --cluster-cidr in /var/snap/microk8s/current/args/kube-proxy (MicroK8s default 10.1.0.0/16).
-    # The Ansible bootstrap asserts this before installing.
+    # Must match the pod subnet of the Talos machine config (pod_subnet in lab-proxmox terraform/environments/k8s)
     clusterPoolIPv4PodCIDRList:
       - 10.1.0.0/16
 
-# kube-proxy replacement. The Ansible bootstrap disables MicroK8s' kube-proxy on every node when this is true.
-# 127.0.0.1:16443 reaches the API server from every node: kube-apiserver on control-plane nodes,
-# the MicroK8s apiserver-proxy (traefik) on worker nodes. Cilium runs with hostNetwork, so localhost works.
+# kube-proxy replacement (Talos deploys no kube-proxy, see the KubeProxyConfig patch in lab-proxmox).
+# KubePrism serves the API server on localhost:7445 of every node; Cilium runs with hostNetwork, so localhost works.
 kubeProxyReplacement: true
-k8sServiceHost: 127.0.0.1
-k8sServicePort: 16443
+k8sServiceHost: localhost
+k8sServicePort: 7445
 
 operator:
   replicas: 1
@@ -60,7 +52,7 @@ gatewayAPI:
 
 # Metrics. The agent (:9962), operator (:9963), Envoy (:9964) and Hubble (:9965) serve Prometheus metrics on
 # host ports. The scrape configuration lives in the ArgoCD repo (PodMonitors): the chart's ServiceMonitors need
-# the Prometheus Operator CRDs, which do not exist yet when the Ansible bootstrap installs Cilium.
+# the Prometheus Operator CRDs, which do not exist yet when the lab-proxmox bootstrap installs Cilium.
 # Dashboards are ConfigMaps labelled grafana_dashboard: "1" for the Grafana sidecar.
 prometheus:
   enabled: true

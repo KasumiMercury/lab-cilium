@@ -33,6 +33,24 @@ operator:
   # Metrics on :9963 are on by default; the dashboard goes with the agent's (see "Metrics" below)
   dashboards:
     enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+# Requests from the observed peak (agent ~440Mi). No memory limit on the agent or Envoy: an OOM kill would
+# cut the node's datapath (and the Gateway for Envoy). No CPU limits anywhere (throttling)
+resources:
+  requests:
+    cpu: 50m
+    memory: 512Mi
+envoy:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
 
 # Restart the agents when cilium-config changes; most settings are only read at startup
 rollOutCiliumPods: true

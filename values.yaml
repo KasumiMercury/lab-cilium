@@ -33,6 +33,8 @@ operator:
   # Metrics on :9963 are on by default; the dashboard goes with the agent's (see "Metrics" below)
   dashboards:
     enabled: true
+    annotations:
+      grafana_folder: Cilium
   resources:
     requests:
       cpu: 10m
@@ -89,6 +91,7 @@ dashboards:
   # The agent dashboard is larger than the 256 KiB last-applied-configuration annotation of client-side apply
   annotations:
     argocd.argoproj.io/sync-options: ServerSideApply=true
+    grafana_folder: Cilium
 
 hubble:
   metrics:
@@ -105,3 +108,5 @@ hubble:
       - httpV2:labelsContext=source_namespace,source_workload,destination_namespace,destination_workload,traffic_direction
     dashboards:
       enabled: true
+      annotations:
+        grafana_folder: Cilium
